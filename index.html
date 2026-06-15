@@ -48,8 +48,11 @@
 
     <!-- App UI -->
     <div class="app-container no-print">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <!-- Sidebar -->
-        <nav class="sidebar">
+        <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-circle">
                     <i class="fas fa-file-invoice-dollar"></i>
@@ -87,6 +90,17 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Mobile Header -->
+            <div class="mobile-header no-print">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="mobile-logo-title">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>نظام الفوترة المرن</span>
+                </div>
+                <div style="width: 40px;"></div>
+            </div>
             <!-- Dashboard Section -->
             <section id="dashboard" class="page-section active">
                 <header class="section-header">
