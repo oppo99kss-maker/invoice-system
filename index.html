@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الفوترة الذكي</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay" style="display: flex;">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h2>تسجيل الدخول للنظام</h2>
+                <p>يرجى إدخال اسم المستخدم وكلمة المرور للمتابعة</p>
+            </div>
+            <form id="loginForm" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label for="loginUsername">اسم المستخدم</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="loginUsername" required placeholder="أدخل اسم المستخدم" autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">كلمة المرور</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="loginPassword" required placeholder="أدخل كلمة المرور" autocomplete="current-password">
+                    </div>
+                </div>
+                <div id="loginError" class="login-error-msg" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> <span>اسم المستخدم أو كلمة المرور غير صحيحة!</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block login-submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> <span>دخول</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App UI -->
+    <div class="app-container no-print">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-circle">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <h2>نظام الفوترة المرن</h2>
+                <p>إدارة الفواتير وعروض الأسعار</p>
+                <div class="active-user-info" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="activeUserLabel">المستخدم: ...</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li data-target="dashboard" class="active">
+                    <i class="fas fa-chart-line"></i> <span>لوحة التحكم</span>
+                </li>
+                <li data-target="clients">
+                    <i class="fas fa-users"></i> <span>بيانات العملاء</span>
+                </li>
+                <li data-target="resources">
+                    <i class="fas fa-boxes"></i> <span>الأصناف والخدمات</span>
+                </li>
+                <li data-target="invoices">
+                    <i class="fas fa-file-invoice"></i> <span>الفواتير والمستندات</span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="theme-toggle-btn" id="themeToggleBtn">
+                    <i class="fas fa-moon"></i> <span>الوضع الداكن</span>
+                </button>
+                <button class="logout-btn" id="logoutBtn" style="margin-top: 8px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; font-family: var(--font-family);">
+                    <i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="page-section active">
+                <header class="section-header">
+                    <h1>لوحة التحكم والتحليلات</h1>
+                    <p>ملخص الأداء المالي وإعدادات النظام الأساسية</p>
+                </header>
+
+                <div class="tabs dashboard-tabs">
+                    <button class="tab-btn active" data-tab="analytics-tab">
+                        <i class="fas fa-chart-bar"></i> <span>التحليلات المالية</span>
+                    </button>
+                    <button class="tab-btn" data-tab="settings-tab">
+                        <i class="fas fa-cogs"></i> <span>إعدادات النظام</span>
+                    </button>
+                </div>
+
+                <!-- Analytics Tab Content -->
+                <div id="analytics-tab" class="tab-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon sales"><i class="fas fa-wallet"></i></div>
+                            <div class="stat-info">
+                                <h3>إجمالي المفوتر</h3>
+                                <p id="stat_total_sales">0.00 ر.س</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon paid"><i class="fas fa-check-double"></i></div>
+                            <div class="stat-info">
+                                <h3>المبالغ المستلمة</h3>
+                                <p id="stat_total_paid">0.00 ر.س</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon outstanding"><i class="fas fa-clock"></i></div>
+                            <div class="stat-info">
+                                <h3>المبالغ المتبقية</h3>
+                                <p id="stat_total_outstanding">0.00 ر.س</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon docs"><i class="fas fa-file-signature"></i></div>
+                            <div class="stat-info">
+                                <h3>المستندات الصادرة</h3>
+                                <p id="stat_doc_counts">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress collection rate -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h3><i class="fas fa-percentage"></i> نسبة تحصيل المبالغ</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-bar" id="collection_progress_bar" style="width: 0%;"></div>
+                            </div>
+                            <p class="progress-text text-center mt-2" id="collection_rate_text">تم تحصيل 0% من الفواتير الصادرة</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent transactions -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> آخر المعاملات</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-container">
+                                <table class="data-table" id="recent-invoices-table">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم المستند</th>
+                                            <th>النوع</th>
+                                            <th>العميل</th>
+                                            <th>التاريخ</th>
+                                            <th>الإجمالي</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Injected via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="recent-empty" class="empty-state">
+                                <i class="fas fa-receipt"></i>
+                                <p>لا توجد معاملات حديثة لعرضها</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab Content -->
+                <div id="settings-tab" class="tab-content">
+                    <div class="card-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-user-tie"></i> بياناتي الأساسية</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>الاسم / اسم المؤسسة</label>
+                                    <input type="text" id="my_name" placeholder="أدخل الاسم">
+                                </div>
+                                <div class="form-group">
+                                    <label>العنوان</label>
+                                    <input type="text" id="my_address" placeholder="المدينة، الحي، الشارع...">
+                                </div>
+                                <div class="form-group">
+                                    <label>رقم الجوال</label>
+                                    <input type="text" id="my_phone" placeholder="05xxxxxxxx">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>الحساب البنكي (البنك)</label>
+                                        <input type="text" id="my_bank" placeholder="اسم البنك">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>رقم الآيبان (IBAN)</label>
+                                        <input type="text" id="my_iban" placeholder="SA...">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>رمز العملة الافتراضي</label>
+                                        <input type="text" id="my_currency" placeholder="مثال: ر.س">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-sliders-h"></i> خيارات المستندات والطباعة</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="toggle-group">
+                                    <label class="switch">
+                                        <input type="checkbox" id="show_bank" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div class="toggle-text">
+                                        <strong>إظهار الحساب البنكي</strong>
+                                        <p>عرض تفاصيل الحساب البنكي في ذيل المستند</p>
+                                    </div>
+                                </div>
+
+                                <div class="toggle-group">
+                                    <label class="switch">
+                                        <input type="checkbox" id="show_barcode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <div class="toggle-text">
+                                        <strong>إظهار باركود حساب الآيبان</strong>
+                                        <p>عرض باركود ليسهل على العميل مسح رقم الآيبان</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label>لغة الفاتورة الافتراضية</label>
+                                    <select id="default_lang">
+                                        <option value="ar">العربية (RTL)</option>
+                                        <option value="en">English (LTR)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label>ملاحظات عرض السعر الافتراضية</label>
+                                    <textarea id="default_quote_notes" rows="2"
+                                        placeholder="مثال: هذا العرض صالح لمدة 7 أيام..."></textarea>
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label>ملاحظات الفاتورة الافتراضية</label>
+                                    <textarea id="default_invoice_notes" rows="2"
+                                        placeholder="مثال: البضاعة المباعة لا ترد ولا تستبدل..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card full-width">
+                            <div class="card-header">
+                                <h3><i class="fas fa-images"></i> الهوية البصرية (الشعار والتوقيع)</h3>
+                            </div>
+                            <div class="card-body uploads-grid">
+                                <div class="upload-box">
+                                    <label>شعار المؤسسة</label>
+                                    <div class="image-preview" id="logo_preview">
+                                        <span class="placeholder-text">اضغط لرفع الشعار</span>
+                                        <img src="" id="logo_img" style="display:none;">
+                                    </div>
+                                    <input type="file" id="logo_upload" accept="image/*" class="hidden-input">
+                                    <button class="btn btn-sm btn-outline btn-danger mt-2" id="clear_logo"
+                                        style="display:none;">إزالة الشعار</button>
+                                </div>
+                                <div class="upload-box">
+                                    <label>التوقيع المعتمد</label>
+                                    <div class="image-preview" id="signature_preview">
+                                        <span class="placeholder-text">اضغط لرفع التوقيع</span>
+                                        <img src="" id="signature_img" style="display:none;">
+                                    </div>
+                                    <input type="file" id="signature_upload" accept="image/*" class="hidden-input">
+                                    <button class="btn btn-sm btn-outline btn-danger mt-2" id="clear_signature"
+                                        style="display:none;">إزالة التوقيع</button>
+                                </div>
+                                <div class="upload-box">
+                                    <label>باركود الآيبان</label>
+                                    <div class="image-preview" id="barcode_preview">
+                                        <span class="placeholder-text">اضغط لرفع الباركود</span>
+                                        <img src="" id="barcode_img" style="display:none;">
+                                    </div>
+                                    <input type="file" id="barcode_upload" accept="image/*" class="hidden-input">
+                                    <button class="btn btn-sm btn-outline btn-danger mt-2" id="clear_barcode"
+                                        style="display:none;">إزالة الباركود</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section id="clients" class="page-section">
+                <header class="section-header action-header">
+                    <div>
+                        <h1>بيانات العملاء</h1>
+                        <p>إدارة عملائك لسرعة إدراجهم في الفواتير</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('clientModal')">
+                        <i class="fas fa-plus"></i> إضافة عميل جديد
+                    </button>
+                </header>
+
+                <div class="search-filter-bar mb-3">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchClients" placeholder="البحث عن عميل بالاسم أو المدينة...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="clients-table">
+                        <thead>
+                            <tr>
+                                <th>اسم العميل / المؤسسة</th>
+                                <th>المدينة</th>
+                                <th>العنوان</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Client rows will be injected here via JS -->
+                        </tbody>
+                    </table>
+                    <div id="clients-empty" class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <p>لا يوجد عملاء مطبقين للمواصفات</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resources Section -->
+            <section id="resources" class="page-section">
+                <header class="section-header action-header">
+                    <div>
+                        <h1>الأصناف والخدمات</h1>
+                        <p>قائمة المنتجات والخدمات الجاهزة للاستخدام في الفواتير</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('resourceModal')">
+                        <i class="fas fa-plus"></i> إضافة بند جديد
+                    </button>
+                </header>
+
+                <div class="search-filter-bar mb-3">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchResources" placeholder="البحث عن بند بالاسم أو الوصف...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="items-table">
+                        <thead>
+                            <tr>
+                                <th>البند</th>
+                                <th>الوصف التفصيلي</th>
+                                <th>الوحدة</th>
+                                <th>السعر الافتراضي</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Items -->
+                        </tbody>
+                    </table>
+                    <div id="items-empty" class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>لا يوجد بنود مضافة حالياً</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Invoices Section -->
+            <section id="invoices" class="page-section">
+                <header class="section-header action-header">
+                    <div>
+                        <h1>الفواتير وعروض الأسعار</h1>
+                        <p>مستنداتك المالية الصادرة</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('invoiceModal', null, true)">
+                        <i class="fas fa-plus"></i> إنشاء مستند جديد
+                    </button>
+                </header>
+
+                <div class="search-filter-bar invoices-filter-bar mb-3">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInvoices" placeholder="البحث برقم المستند أو اسم العميل...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filterInvoiceType">
+                            <option value="">كل المستندات</option>
+                            <option value="quote">عروض الأسعار</option>
+                            <option value="invoice">الفواتير الإلكترونية</option>
+                            <option value="maintenance">فواتير الصيانة</option>
+                        </select>
+                        <select id="filterInvoiceStatus">
+                            <option value="">كل حالات الدفع</option>
+                            <option value="paid">مدفوعة بالكامل</option>
+                            <option value="partial">مدفوعة جزئياً</option>
+                            <option value="unpaid">غير مدفوعة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="invoices-table">
+                        <thead>
+                            <tr>
+                                <th>رقم المستند</th>
+                                <th>النوع</th>
+                                <th>العميل</th>
+                                <th>التاريخ</th>
+                                <th>الإجمالي النهائي</th>
+                                <th>الحالة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Invoices will appear here -->
+                        </tbody>
+                    </table>
+                    <div id="invoices-empty" class="empty-state">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <p>لا توجد مستندات مسجلة تطابق التصفية</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Client Modal -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="clientModalTitle">إضافة عميل جديد</h2>
+            <div class="modal-body">
+                <input type="hidden" id="clientId">
+                <div class="form-group">
+                    <label>اسم العميل أو المؤسسة *</label>
+                    <input type="text" id="clientName" required>
+                </div>
+                <div class="form-group">
+                    <label>العنوان</label>
+                    <input type="text" id="clientAddress">
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>المدينة</label>
+                        <input type="text" id="clientCity">
+                    </div>
+                    <div class="form-group half">
+                        <label>الحي</label>
+                        <input type="text" id="clientNeighborhood">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>الرمز البريدي</label>
+                        <input type="text" id="clientZip">
+                    </div>
+                    <div class="form-group half">
+                        <label>الرقم الضريبي (اختياري)</label>
+                        <input type="text" id="clientTaxNum">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-btn">إلغاء</button>
+                <button class="btn btn-primary" id="saveClientBtn">حفظ العميل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item / Resource Modal -->
+    <div id="resourceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="resourceModalTitle">إضافة صنف جديد</h2>
+            <div class="modal-body">
+                <input type="hidden" id="resourceId">
+                <div class="form-group">
+                    <label>اسم البند *</label>
+                    <input type="text" id="resourceName" required>
+                </div>
+                <div class="form-group">
+                    <label>الوصف التفصيلي (اختياري)</label>
+                    <textarea id="resourceDesc" rows="3" placeholder="أدخل تفاصيل البند..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>السعر الافتراضي *</label>
+                        <input type="number" id="resourcePrice" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group half">
+                        <label>الوحدة (مثال: حبة، ساعة، متر...)</label>
+                        <input type="text" id="resourceUnit" placeholder="حبة">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-btn">إلغاء</button>
+                <button class="btn btn-primary" id="saveResourceBtn">حفظ البند</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Invoice/Quote Modal -->
+    <div id="invoiceModal" class="modal full-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="invoiceModalTitle">إنشاء مستند جديد</h2>
+            <div class="modal-body invoice-builder">
+                <!-- Top Settings -->
+                <div class="invoice-meta-grid">
+                    <div class="form-group">
+                        <label>نوع المستند *</label>
+                        <select id="invType" required>
+                            <option value="quote">عرض سعر</option>
+                            <option value="invoice">فاتورة إلكترونية</option>
+                            <option value="maintenance">فاتورة صيانة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="invDocNumLabel">رقم المستند *</label>
+                        <input type="text" id="invDocNum" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>العميل *</label>
+                        <select id="invClientSelect" required>
+                            <!-- Options injected -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>تاريخ الإنشاء</label>
+                        <input type="date" id="invDate">
+                    </div>
+
+                    <div class="form-group" id="invExpiryGroup">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" id="invHasExpiry">
+                            <span>تفعيل مدة الصلاحية</span>
+                        </label>
+                        <input type="number" id="invExpiryDays" placeholder="عدد الأيام (مثال 7)" disabled min="1">
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="invoice-items-builder mt-3">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3>البنود المدرجة في المستند</h3>
+                    </div>
+                    <div class="add-item-bar mb-2">
+                        <select id="invItemSelect" style="flex:1;">
+                            <option value="">-- اختر صنفاً من قائمة البنود --</option>
+                            <!-- Resources grouping -->
+                        </select>
+                        <button class="btn btn-secondary btn-sm" id="invAddItemBtn"><i class="fas fa-plus"></i> إضافة من القائمة</button>
+                        <button class="btn btn-outline btn-sm" id="invAddNewCustomItemBtn" title="إضافة بند مخصص جديد"><i class="fas fa-boxes"></i> صنف جديد</button>
+                    </div>
+
+                    <table class="data-table" id="invBuilderTable">
+                        <thead>
+                            <tr>
+                                <th style="width:5%">#</th>
+                                <th style="width:35%">البند</th>
+                                <th style="width:12%">الكمية</th>
+                                <th style="width:18%">سعر القطعة</th>
+                                <th style="width:12%">الخصم</th>
+                                <th style="width:13%">الإجمالي</th>
+                                <th style="width:5%"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="invBuilderItems">
+                            <!-- Selected items added here -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-left"><strong>المجموع</strong></td>
+                                <td colspan="2"><span id="invSubtotal">0.00</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-left"><strong>إجمالي الخصم (-)</strong></td>
+                                <td colspan="2"><span id="invTotalDiscount">0.00</span></td>
+                            </tr>
+                            <tr class="grand-total-row">
+                                <td colspan="5" class="text-left"><strong>الإجمالي النهائي</strong></td>
+                                <td colspan="2"><span id="invGrandTotal">0.00</span></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="form-row mt-3">
+                    <div class="form-group half">
+                        <label>ملاحظات إضافية (تظهر في الطباعة)</label>
+                        <textarea id="invLocalNotes" rows="2"
+                            placeholder="ملاحظات مخصصة لهذا المستند..."></textarea>
+                    </div>
+                    <div class="form-group half" id="invNextMaintGroup" style="display: none;">
+                        <label>موعد الصيانة القادم</label>
+                        <input type="date" id="invNextMaintenanceDate">
+                    </div>
+                </div>
+
+                <!-- Payment Status for Invoice -->
+                <div id="invPaymentSection" class="mt-3">
+                    <h3>حالة سداد المستند</h3>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>طريقة/حالة السداد</label>
+                            <select id="invPaymentStatus">
+                                <option value="unpaid">غير مدفوع</option>
+                                <option value="partial">مدفوع جزئياً</option>
+                                <option value="paid">مدفوع بالكامل</option>
+                            </select>
+                        </div>
+                        <div class="form-group half" id="invAmountPaidGrp" style="display:none;">
+                            <label>المبلغ المدفوع</label>
+                            <input type="number" id="invAmountPaid" step="0.01" min="0">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="invPreviewBtn"><i class="fas fa-eye"></i> معاينة المستند</button>
+                <button class="btn btn-primary" id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ المستند</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Print Area Frame (Hidden from UI, used for generating PDF) -->
+    <div class="print-container no-screen" id="printLayout">
+        <div class="print-page" id="printPage">
+            <!-- Header -->
+            <div class="print-header">
+                <div class="print-left">
+                    <div class="print-my-info">
+                        <strong id="pMyName">---</strong><br>
+                        <span id="pMyAddress"></span><br>
+                        <span id="pMyPhone"></span>
+                    </div>
+                </div>
+                <div class="print-center">
+                    <h2 class="print-doc-title" id="pDocTitle">عرض سعر</h2>
+                </div>
+                <div class="print-right">
+                    <img id="pLogo" src="" alt="شعار"
+                        style="display:none; max-height: 90px; max-width: 160px; margin-bottom:15px; object-fit: contain;">
+                    <div class="print-doc-info">
+                        <strong id="pDocNumLabel">رقم المستند:</strong> <span id="pDocNum">---</span><br>
+                        <strong>التاريخ:</strong> <span id="pDocDate">---</span><br>
+                        <span id="pDocExpiryWrapper" style="display:none;"><strong>تاريخ الصلاحية:</strong> <span
+                                id="pDocExpiry">---</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Info Block -->
+            <div class="print-client-box">
+                <div class="print-client-details" id="pClientDetails">
+                    <!-- injected dynamically -->
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:40%">البند</th>
+                        <th style="width:10%">الكمية</th>
+                        <th style="width:15%">سعر القطعة</th>
+                        <th style="width:15%">الخصم</th>
+                        <th style="width:15%">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody id="pTableBody">
+                    <!-- items injected here -->
+                </tbody>
+            </table>
+
+                                            <!-- Summary -->
+            <div class="print-summary-box">
+                <div class="print-bank-section" id="pBankSection" style="display:none;">
+                    <div>
+                        <strong>الحساب البنكي:</strong> <span id="pBankName"></span><br>
+                        <strong>الآيبان:</strong> <span id="pBankIban" dir="ltr"></span>
+                    </div>
+                    <img id="pBankBarcodeImg" src="" alt="باركود الآيبان" style="display:none;">
+                </div>
+
+                <div class="stamp-wrapper">
+                    <!-- Paid Stamp -->
+                    <div class="stamp-paid" id="pStampPaid" style="display:none;">مدفوعة</div>
+                </div>
+
+                <table class="print-summary-table">
+                    <tr>
+                        <td>المجموع:</td>
+                        <td id="pSubtotal">0.00</td>
+                    </tr>
+                    <tr>
+                        <td>إجمالي الخصم:</td>
+                        <td id="pDiscount">0.00</td>
+                    </tr>
+                    <tr class="pt-grand">
+                        <td>المبلغ المطلوب:</td>
+                        <td id="pGrandTotal">0.00</td>
+                    </tr>
+                    <tr id="pPaymentRow1" style="display:none;">
+                        <td>المبلغ المدفوع:</td>
+                        <td id="pPaid">0.00</td>
+                    </tr>
+                    <tr id="pPaymentRow2" style="display:none;">
+                        <td>المبلغ المتبقي:</td>
+                        <td id="pRemaining">0.00</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Notes Area (Full Width) -->
+            <div class="print-notes-container">
+                <div class="print-notes-section">
+                    <strong>الملاحظات والشروط:</strong>
+                    <div id="pDefaultNotesText"></div>
+                    <div id="pNotesText" style="margin-top:10px; border-top: 1px dotted #ccc; padding-top: 5px;"></div>
+                    <div id="pNextMaintenanceSection"
+                        style="display:none; margin-top:15px; background: #eef2f5; padding: 10px; border-radius: 5px; border-right: 4px solid #4f46e5;">
+                        <strong>موعد الصيانة القادم: </strong> <span id="pNextMaintenanceDate"
+                            style="color: #ef4444; font-weight: bold; font-size: 16px;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="print-footer">
+                <div class="print-signature" id="pSignatureSection" style="display:none;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">التوقيع والختم:</div>
+                    <img id="pSignatureImg" src="" alt="التوقيع">
+                </div>
+                <!-- Signature placeholder if no image -->
+                <div class="print-signature-placeholder" id="pSignaturePlaceholder">
+                    <div style="font-weight: bold; margin-bottom: 40px;">التوقيع والختم:</div>
+                    <div style="border-top: 1px solid #ccc; width: 150px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Generation/Preview Overlay -->
+    <div id="pdfOverlay" class="pdf-overlay no-print" style="display:none;">
+        <div class="pdf-toolbar">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="btn btn-secondary" onclick="closeDocPreview()"><i class="fas fa-times"></i> إغلاق المعاينة</button>
+                <div class="form-group mb-0" style="margin-bottom: 0;">
+                    <select id="preview_lang" style="padding: 5px 10px; width: auto;">
+                        <option value="ar">العربية (RTL)</option>
+                        <option value="en">English (LTR)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="pdfPrintBtn"><i class="fas fa-print"></i> طباعة / حفظ PDF</button>
+        </div>
+        <div class="pdf-wrapper">
+            <!-- We will embed the print layout copy here for preview -->
+            <div id="pdfPreviewContainer"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

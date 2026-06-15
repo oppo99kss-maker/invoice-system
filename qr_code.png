@@ -1,0 +1,6 @@
+en: malformed 'create-qr-code' API request. Please consider the API
+    documentation at http://goqr.me/api/doc/create-qr-code/
+
+
+de: ungültige 'create-qr-code'-API-Anfrage. Bitte beachten Sie die
+    API-Dokumentation unter http://goqr.me/de/api/doc/create-qr-code/
