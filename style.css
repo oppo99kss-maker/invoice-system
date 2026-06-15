@@ -1757,3 +1757,93 @@ body.dark-mode .mobile-menu-btn:hover {
         max-width: 90% !important;
     }
 }
+
+/* --- Desktop Sidebar Collapsed Styles --- */
+.sidebar-toggle-desktop {
+    position: absolute;
+    top: 15px;
+    left: -15px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 105;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle-desktop:hover {
+    background-color: var(--accent-hover);
+    transform: scale(1.1);
+}
+
+.sidebar-toggle-desktop i {
+    transition: transform 0.3s ease;
+}
+
+@media (min-width: 993px) {
+    .sidebar {
+        position: relative;
+        transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .sidebar.collapsed {
+        width: 75px;
+    }
+    
+    .sidebar.collapsed .sidebar-header h2,
+    .sidebar.collapsed .sidebar-header p,
+    .sidebar.collapsed .active-user-info,
+    .sidebar.collapsed .nav-links li span,
+    .sidebar.collapsed .sidebar-footer button span {
+        display: none !important;
+    }
+    
+    .sidebar.collapsed .logo-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        margin-bottom: 0;
+    }
+    
+    .sidebar.collapsed .nav-links li {
+        justify-content: center;
+        padding: 12px;
+        margin: 4px 8px;
+    }
+    
+    .sidebar.collapsed .nav-links li i {
+        font-size: 1.3rem;
+        margin: 0;
+        width: auto;
+    }
+    
+    .sidebar.collapsed .sidebar-toggle-desktop i {
+        transform: rotate(180deg);
+    }
+    
+    .sidebar.collapsed .theme-toggle-btn,
+    .sidebar.collapsed .logout-btn {
+        padding: 10px;
+        justify-content: center;
+    }
+    
+    .sidebar.collapsed .theme-toggle-btn i,
+    .sidebar.collapsed .logout-btn i {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+}
+
+/* Hide desktop toggle on mobile */
+@media (max-width: 992px) {
+    .sidebar-toggle-desktop {
+        display: none !important;
+    }
+}

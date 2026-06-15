@@ -79,6 +79,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Bind desktop sidebar collapse toggle
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    if (sidebarToggleBtn && sidebar) {
+        const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+        }
+        
+        sidebarToggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+        });
+    }
+
     checkLoginState();
     
     initNavigation();
