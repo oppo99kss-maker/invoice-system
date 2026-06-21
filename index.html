@@ -524,6 +524,15 @@
                     <label>الوصف التفصيلي (اختياري)</label>
                     <textarea id="resourceDesc" rows="3" placeholder="أدخل تفاصيل البند..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label>صورة الصنف (اختياري)</label>
+                    <div class="image-preview" id="item_image_preview">
+                        <span class="placeholder-text" id="item_image_placeholder">اضغط لرفع صورة الصنف</span>
+                        <img src="" id="item_image_img" style="display:none;">
+                    </div>
+                    <input type="file" id="item_image_upload" accept="image/*" class="hidden-input" style="display: none;">
+                    <button class="btn btn-sm btn-outline btn-danger mt-2" id="clear_item_image" style="display:none;">إزالة الصورة</button>
+                </div>
                 <div class="form-row">
                     <div class="form-group half">
                         <label>السعر الافتراضي *</label>

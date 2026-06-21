@@ -103,7 +103,43 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setupModals();
     setupInvoiceBuilder();
+    setupResourceImageUpload();
 });
+
+function setupResourceImageUpload() {
+    const fileInput = document.getElementById('item_image_upload');
+    const previewBox = document.getElementById('item_image_preview');
+    const imgEl = document.getElementById('item_image_img');
+    const clearBtn = document.getElementById('clear_item_image');
+    const placeholder = document.getElementById('item_image_placeholder');
+
+    if (!fileInput || !previewBox || !imgEl || !clearBtn || !placeholder) return;
+
+    previewBox.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64 = e.target.result;
+                imgEl.src = base64;
+                imgEl.style.display = 'block';
+                placeholder.style.display = 'none';
+                clearBtn.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        imgEl.src = '';
+        imgEl.style.display = 'none';
+        placeholder.style.display = 'block';
+        clearBtn.style.display = 'none';
+        fileInput.value = "";
+    });
+}
 
 // --- Authentication Management ---
 async function sha256(message) {
@@ -398,6 +434,13 @@ function openModal(modalId, itemId = null, isNewInvoice = false) {
         }
     } else if (modalId === 'resourceModal') {
         const title = document.getElementById('resourceModalTitle');
+        const imgEl = document.getElementById('item_image_img');
+        const placeholder = document.getElementById('item_image_placeholder');
+        const clearBtn = document.getElementById('clear_item_image');
+        const fileInput = document.getElementById('item_image_upload');
+        
+        fileInput.value = ''; // reset file input
+
         if (itemId) {
             title.innerText = 'تعديل صنف';
             const res = appData.resources.find(r => r.id === itemId);
@@ -407,6 +450,18 @@ function openModal(modalId, itemId = null, isNewInvoice = false) {
                 document.getElementById('resourceDesc').value = res.desc || '';
                 document.getElementById('resourcePrice').value = res.price || 0;
                 document.getElementById('resourceUnit').value = res.unit || '';
+                
+                if (res.image) {
+                    imgEl.src = res.image;
+                    imgEl.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    clearBtn.style.display = 'inline-block';
+                } else {
+                    imgEl.src = '';
+                    imgEl.style.display = 'none';
+                    placeholder.style.display = 'block';
+                    clearBtn.style.display = 'none';
+                }
             }
         } else {
             title.innerText = 'إضافة صنف جديد';
@@ -415,6 +470,11 @@ function openModal(modalId, itemId = null, isNewInvoice = false) {
             document.getElementById('resourceDesc').value = '';
             document.getElementById('resourcePrice').value = '';
             document.getElementById('resourceUnit').value = '';
+            
+            imgEl.src = '';
+            imgEl.style.display = 'none';
+            placeholder.style.display = 'block';
+            clearBtn.style.display = 'none';
         }
     } else if (modalId === 'invoiceModal') {
         // دائماً قم بتعبئة قوائم العملاء والبنود المنسدلة للتأكد من وجود الخيارات قبل ملء النموذج
@@ -661,11 +721,14 @@ document.getElementById('saveResourceBtn').addEventListener('click', () => {
 
     if (!name || isNaN(price)) { alert('الاسم والسعر مطلوبان'); return; }
 
+    const imgEl = document.getElementById('item_image_img');
+    const isImgVisible = imgEl.style.display === 'block';
     const resData = {
         name,
         desc: document.getElementById('resourceDesc').value.trim(),
         price,
-        unit: unit || 'حبة'
+        unit: unit || 'حبة',
+        image: isImgVisible ? imgEl.src : ''
     };
 
     if (id) {
@@ -708,7 +771,14 @@ function renderResources(searchQuery = '') {
     list.forEach(res => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${res.name}</strong></td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${res.image ? `<img src="${res.image}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);" alt="${res.name}">` : `<div style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 8px; border: 1px dashed var(--border-color); color: var(--text-light);"><i class="fas fa-image" style="font-size: 1.1rem;"></i></div>`}
+                    <div>
+                        <strong>${res.name}</strong>
+                    </div>
+                </div>
+            </td>
             <td>${res.desc || '-'}</td>
             <td>${res.unit || 'حبة'}</td>
             <td>${res.price.toFixed(2)} ${currency}</td>
@@ -841,7 +911,8 @@ document.getElementById('invAddItemBtn').addEventListener('click', () => {
             qty: 1,
             price: res.price || 0, // Copy Price
             discount: 0,
-            unit: res.unit || 'حبة' // Copy Unit
+            unit: res.unit || 'حبة', // Copy Unit
+            image: res.image || '' // Copy Image
         });
         renderInvoiceItemsTable();
     }
@@ -922,8 +993,13 @@ function renderInvoiceItemsTable() {
         tr.innerHTML = `
             <td>${index + 1}</td>
             <td style="text-align: right;">
-                <input type="text" class="inv-item-name" data-index="${index}" value="${item.name}">
-                <input type="text" class="inv-item-desc" data-index="${index}" value="${item.desc || ''}" placeholder="أدخل الوصف (اختياري)..." style="font-size:0.8rem; color:#64748b; width:100%; border:none; margin-top:4px; background:transparent;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${item.image ? `<img src="${item.image}" style="width: 35px; height: 35px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color);" alt="${item.name}">` : `<div style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 6px; border: 1px dashed var(--border-color); color: var(--text-light);"><i class="fas fa-image" style="font-size: 0.8rem;"></i></div>`}
+                    <div style="flex: 1;">
+                        <input type="text" class="inv-item-name" data-index="${index}" value="${item.name}" style="width: 100%;">
+                        <input type="text" class="inv-item-desc" data-index="${index}" value="${item.desc || ''}" placeholder="أدخل الوصف (اختياري)..." style="font-size:0.8rem; color:#64748b; width:100%; border:none; margin-top:4px; background:transparent;">
+                    </div>
+                </div>
             </td>
             <td><input type="text" inputmode="numeric" class="inv-item-qty" data-index="${index}" value="${item.qty}"></td>
             <td><input type="text" inputmode="decimal" class="inv-item-price" data-index="${index}" value="${item.price}"></td>
@@ -1562,12 +1638,18 @@ function renderPrintLayout(inv, lang = 'ar') {
     tbody.innerHTML = '';
     inv.items.forEach((item, idx) => {
         const itemTotal = (item.price * item.qty) - (item.discount || 0);
+        const hasImage = item.image && item.image.startsWith('data:image/');
         tbody.innerHTML += `
             <tr>
                 <td>${idx + 1}</td>
                 <td class="item-cell">
-                    <strong>${item.name}</strong>
-                    ${item.desc ? `<span>${item.desc}</span>` : ''}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${hasImage ? `<img src="${item.image}" style="width: 35px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;" class="print-item-img">` : ''}
+                        <div style="text-align: right;">
+                            <strong style="display: block;">${item.name}</strong>
+                            ${item.desc ? `<span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">${item.desc}</span>` : ''}
+                        </div>
+                    </div>
                 </td>
                 <td>${item.qty} ${item.unit || 'حبة'}</td>
                 <td>${item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}</td>
